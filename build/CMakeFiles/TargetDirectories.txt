@@ -1,0 +1,3 @@
+/home/kanha/Desktop/ResourceScheduler/build/CMakeFiles/scheduler_module.dir
+/home/kanha/Desktop/ResourceScheduler/build/CMakeFiles/edit_cache.dir
+/home/kanha/Desktop/ResourceScheduler/build/CMakeFiles/rebuild_cache.dir
