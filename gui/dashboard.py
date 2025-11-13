@@ -29,8 +29,9 @@ class Dashboard:
         # State variables
         self.running = True
         self.all_processes = []
-        self.sort_column = None
-        self.sort_reverse = False
+        self.sort_column = "Memory"  # Default sort column
+        self.sort_reverse = True     # True = descending (higher values first)
+        self.user_sorted = False
         
         # Setup UI
         self.setup_ui()
@@ -126,8 +127,8 @@ class Dashboard:
             tree_frame,
             columns=("PID", "Name", "Priority", "Status", "Memory", "CPU"),
             show="headings",
-            selectmode="browse"
-        )
+            selectmode="extended"
+            )
         
         # Configure columns
         self.process_tree.heading("PID", text="PID", command=lambda: self.sort_treeview("PID"))
@@ -152,6 +153,9 @@ class Dashboard:
         self.process_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         vsb.grid(row=0, column=1, sticky=(tk.N, tk.S))
         hsb.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        # Set default sort column
+        #self.sort_column = "Memory"
+        #self.sort_reverse = False  # Will be toggled to True on first sort
     
     def setup_performance_tab(self):
         """Setup the performance monitoring tab"""
@@ -355,14 +359,21 @@ class Dashboard:
     def filter_processes(self, event=None):
         """Filter processes based on search term"""
         search_term = self.search_entry.get().lower()
+    
+        # Store current selection
+        selected_items = self.process_tree.selection()
+        selected_pid = None
+        if selected_items:
+            selected_pid = self.process_tree.item(selected_items[0])["values"][0]
+    
         self.process_tree.delete(*self.process_tree.get_children())
-        
+    
         filtered_count = 0
         for proc in self.all_processes:
             if (search_term in proc.name.lower() or 
                 search_term in str(proc.pid)):
-                
-                self.process_tree.insert("", "end", values=(
+            
+                item_id = self.process_tree.insert("", "end", values=(
                     proc.pid,
                     proc.name,
                     proc.priority,
@@ -370,29 +381,87 @@ class Dashboard:
                     f"{proc.memory_usage / (1024 * 1024):.2f}",
                     f"{proc.cpu_usage:.2f}"
                 ))
+            
+                # Restore selection if this was the selected process
+                if selected_pid and proc.pid == selected_pid:
+                    self.process_tree.selection_set(item_id)
+                    self.process_tree.see(item_id)
+
                 filtered_count += 1
-        
+    
         self.process_count_label.config(
             text=f"Processes: {filtered_count} / {len(self.all_processes)}"
-        )
+        )   
+    
+        # Only apply sorting if user has chosen a sort or on initial load
+        if hasattr(self, 'sort_column') and self.sort_column and self.user_sorted:
+            # Re-apply the user's chosen sort without toggling
+            current_reverse = self.sort_reverse
+            items = [(self.process_tree.set(item, self.sort_column), item) 
+                    for item in self.process_tree.get_children('')]
+        
+            if self.sort_column in ["PID", "Priority"]:
+                try:
+                    items.sort(key=lambda x: int(x[0]), reverse=current_reverse)
+                except ValueError:
+                    items.sort(key=lambda x: str(x[0]).lower(), reverse=current_reverse)
+            elif self.sort_column in ["Memory", "CPU"]:
+                try:
+                    items.sort(key=lambda x: float(x[0].replace(',', '')), reverse=current_reverse)
+                except ValueError:
+                    items.sort(key=lambda x: 0.0, reverse=current_reverse)
+            else:
+                items.sort(key=lambda x: str(x[0]).lower(), reverse=current_reverse)
+        
+            for index, (_, item) in enumerate(items):
+                self.process_tree.move(item, '', index)
     
     def sort_treeview(self, col):
         """Sort treeview by column"""
+        # If clicking the same column, toggle direction
+        if self.sort_column == col:
+            self.sort_reverse = not self.sort_reverse
+        else:
+            # New column: default to descending for numeric columns, ascending for text
+            self.sort_column = col
+            if col in ["Memory", "CPU"]:
+                self.sort_reverse = True  # Descending for numeric
+            else:
+                self.sort_reverse = False  # Ascending for text/priority
+    
+        self.user_sorted = True  # Mark that user has manually sorted
+    
         items = [(self.process_tree.set(item, col), item) 
-                 for item in self.process_tree.get_children('')]
-        
+                for item in self.process_tree.get_children('')]
+    
         # Determine data type for sorting
-        try:
-            items.sort(key=lambda x: float(x[0]), reverse=self.sort_reverse)
-        except ValueError:
+        if col in ["PID", "Priority"]:
+            # Integer sorting
+            try:
+                items.sort(key=lambda x: int(x[0]), reverse=self.sort_reverse)
+            except ValueError:
+                items.sort(key=lambda x: str(x[0]).lower(), reverse=self.sort_reverse)
+        elif col in ["Memory", "CPU"]:
+            # Float sorting
+            try:
+                items.sort(key=lambda x: float(x[0].replace(',', '')), reverse=self.sort_reverse)
+            except ValueError:
+                items.sort(key=lambda x: 0.0, reverse=self.sort_reverse)
+        else:
+            # String sorting
             items.sort(key=lambda x: str(x[0]).lower(), reverse=self.sort_reverse)
-        
+    
         # Rearrange items
         for index, (_, item) in enumerate(items):
             self.process_tree.move(item, '', index)
-        
-        # Toggle sort direction
-        self.sort_reverse = not self.sort_reverse
+    
+        # Update column heading to show sort direction
+        for column in self.process_tree["columns"]:
+            if column == col:
+                heading = f"{column} {'▼' if self.sort_reverse else '▲'}"
+            else:
+                heading = column
+            self.process_tree.heading(column, text=heading)
     
     def on_mode_changed(self, event):
         """Handle mode change"""

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kanha/Desktop/ResourceScheduler/gui/scheduler_module.cpython-312-x86_64-linux-gnu.so"
-  "/home/kanha/Desktop/ResourceScheduler/gui/scheduler_module.pdb"
+  "/home/priyanshu-bahuguna/LPro/Ralloc_2.0/gui/scheduler_module.cpython-312-x86_64-linux-gnu.so"
+  "/home/priyanshu-bahuguna/LPro/Ralloc_2.0/gui/scheduler_module.pdb"
   "CMakeFiles/scheduler_module.dir/src/analytics/performance_analyzer.cpp.o"
   "CMakeFiles/scheduler_module.dir/src/analytics/performance_analyzer.cpp.o.d"
   "CMakeFiles/scheduler_module.dir/src/logger/logger.cpp.o"

@@ -1,8 +1,8 @@
 CMakeFiles/scheduler_module.dir/src/scheduler/scheduler.cpp.o: \
- /home/kanha/Desktop/ResourceScheduler/src/scheduler/scheduler.cpp \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/src/scheduler/scheduler.cpp \
  /usr/include/stdc-predef.h \
- /home/kanha/Desktop/ResourceScheduler/include/scheduler.h \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/scheduler.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -161,9 +161,9 @@ CMakeFiles/scheduler_module.dir/src/scheduler/scheduler.cpp.o: \
  /usr/include/c++/13/ext/concurrence.h /usr/include/c++/13/atomic \
  /usr/include/c++/13/bits/atomic_base.h \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
- /home/kanha/Desktop/ResourceScheduler/include/memory_manager.h \
- /home/kanha/Desktop/ResourceScheduler/include/logger.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/memory_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/logger.h \
  /usr/include/c++/13/fstream /usr/include/c++/13/istream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

@@ -1,8 +1,8 @@
 CMakeFiles/scheduler_module.dir/src/logger/logger.cpp.o: \
- /home/kanha/Desktop/ResourceScheduler/src/logger/logger.cpp \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/src/logger/logger.cpp \
  /usr/include/stdc-predef.h \
- /home/kanha/Desktop/ResourceScheduler/include/logger.h \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/logger.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \

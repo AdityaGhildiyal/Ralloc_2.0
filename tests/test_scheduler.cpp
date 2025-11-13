@@ -7,6 +7,8 @@
 #include <chrono>
 #include <iomanip>
 #include <unistd.h>
+#include <algorithm>
+
 
 void print_separator() {
     std::cout << std::string(80, '=') << std::endl;

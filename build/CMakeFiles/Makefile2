@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kanha/Desktop/ResourceScheduler
+CMAKE_SOURCE_DIR = /home/priyanshu-bahuguna/LPro/Ralloc_2.0
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kanha/Desktop/ResourceScheduler/build
+CMAKE_BINARY_DIR = /home/priyanshu-bahuguna/LPro/Ralloc_2.0/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/scheduler_module.dir/clean
 CMakeFiles/scheduler_module.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/scheduler_module.dir/build.make CMakeFiles/scheduler_module.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/scheduler_module.dir/build.make CMakeFiles/scheduler_module.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/kanha/Desktop/ResourceScheduler/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target scheduler_module"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/priyanshu-bahuguna/LPro/Ralloc_2.0/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target scheduler_module"
 .PHONY : CMakeFiles/scheduler_module.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/scheduler_module.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kanha/Desktop/ResourceScheduler/build/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/priyanshu-bahuguna/LPro/Ralloc_2.0/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/scheduler_module.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kanha/Desktop/ResourceScheduler/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/priyanshu-bahuguna/LPro/Ralloc_2.0/build/CMakeFiles 0
 .PHONY : CMakeFiles/scheduler_module.dir/rule
 
 # Convenience name for target.

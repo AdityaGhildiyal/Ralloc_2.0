@@ -1,8 +1,8 @@
 CMakeFiles/scheduler_module.dir/src/analytics/performance_analyzer.cpp.o: \
- /home/kanha/Desktop/ResourceScheduler/src/analytics/performance_analyzer.cpp \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/src/analytics/performance_analyzer.cpp \
  /usr/include/stdc-predef.h \
- /home/kanha/Desktop/ResourceScheduler/include/performance_analyzer.h \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/performance_analyzer.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \

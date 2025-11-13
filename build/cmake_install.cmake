@@ -1,4 +1,4 @@
-# Install script for directory: /home/kanha/Desktop/ResourceScheduler
+# Install script for directory: /home/priyanshu-bahuguna/LPro/Ralloc_2.0
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/kanha/Desktop/ResourceScheduler/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/priyanshu-bahuguna/LPro/Ralloc_2.0/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

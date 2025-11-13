@@ -1,8 +1,8 @@
 CMakeFiles/scheduler_module.dir/src/memory/memory_manager.cpp.o: \
- /home/kanha/Desktop/ResourceScheduler/src/memory/memory_manager.cpp \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/src/memory/memory_manager.cpp \
  /usr/include/stdc-predef.h \
- /home/kanha/Desktop/ResourceScheduler/include/memory_manager.h \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/memory_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -120,7 +120,7 @@ CMakeFiles/scheduler_module.dir/src/memory/memory_manager.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
  /usr/include/c++/13/fstream /usr/include/c++/13/istream \
  /usr/include/c++/13/ios /usr/include/c++/13/exception \
  /usr/include/c++/13/bits/exception_ptr.h \

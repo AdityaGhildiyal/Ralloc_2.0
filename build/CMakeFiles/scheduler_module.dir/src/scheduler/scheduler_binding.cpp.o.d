@@ -1,5 +1,5 @@
 CMakeFiles/scheduler_module.dir/src/scheduler/scheduler_binding.cpp.o: \
- /home/kanha/Desktop/ResourceScheduler/src/scheduler/scheduler_binding.cpp \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/src/scheduler/scheduler_binding.cpp \
  /usr/include/stdc-predef.h /usr/include/pybind11/pybind11.h \
  /usr/include/pybind11/detail/class.h /usr/include/pybind11/attr.h \
  /usr/include/pybind11/detail/common.h /usr/include/python3.12/Python.h \
@@ -369,8 +369,8 @@ CMakeFiles/scheduler_module.dir/src/scheduler/scheduler_binding.cpp.o: \
  /usr/include/c++/13/bits/mask_array.h \
  /usr/include/c++/13/bits/indirect_array.h /usr/include/c++/13/variant \
  /usr/include/c++/13/bits/parse_numbers.h \
- /home/kanha/Desktop/ResourceScheduler/include/scheduler.h \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/scheduler.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
  /usr/include/c++/13/thread /usr/include/c++/13/bits/std_thread.h \
  /usr/include/c++/13/bits/this_thread_sleep.h \
  /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
@@ -378,5 +378,5 @@ CMakeFiles/scheduler_module.dir/src/scheduler/scheduler_binding.cpp.o: \
  /usr/include/c++/13/bits/std_mutex.h /usr/include/c++/13/mutex \
  /usr/include/c++/13/bits/unique_lock.h \
  /usr/include/c++/13/condition_variable /usr/include/c++/13/atomic \
- /home/kanha/Desktop/ResourceScheduler/include/process_manager.h \
- /home/kanha/Desktop/ResourceScheduler/include/memory_manager.h
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/process_manager.h \
+ /home/priyanshu-bahuguna/LPro/Ralloc_2.0/include/memory_manager.h

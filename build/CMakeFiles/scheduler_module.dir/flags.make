@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -Dscheduler_module_EXPORTS
 
-CXX_INCLUDES = -I/home/kanha/Desktop/ResourceScheduler/include -isystem /usr/include/python3.12
+CXX_INCLUDES = -I/home/priyanshu-bahuguna/LPro/Ralloc_2.0/include -isystem /usr/include/python3.12
 
 CXX_FLAGS = -std=gnu++17 -fPIC -fvisibility=hidden -flto -fno-fat-lto-objects
 
