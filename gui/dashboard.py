@@ -6,7 +6,7 @@ import scheduler_module
 import time
 import os
 import sys
-
+from brightness_control import BrightnessControl
 
 class Dashboard:
     def __init__(self, root):
@@ -25,6 +25,9 @@ class Dashboard:
         
         self.scheduler = scheduler_module.Scheduler()
         self.scheduler.start_monitoring()
+
+        # Initialize brightness control
+        self.brightness_control = BrightnessControl()
         
         # State variables
         self.running = True
@@ -366,6 +369,14 @@ class Dashboard:
         if selected_items:
             selected_pid = self.process_tree.item(selected_items[0])["values"][0]
     
+        # Store current scroll position
+        first_visible = None
+        visible_items = self.process_tree.get_children()
+        if visible_items:
+            # Get the first visible item's index
+            yview = self.process_tree.yview()
+            first_visible = yview[0]  # Store scroll position
+    
         self.process_tree.delete(*self.process_tree.get_children())
     
         filtered_count = 0
@@ -382,16 +393,16 @@ class Dashboard:
                     f"{proc.cpu_usage:.2f}"
                 ))
             
-                # Restore selection if this was the selected process
+                # Restore selection if this was the selected process (but don't scroll to it)
                 if selected_pid and proc.pid == selected_pid:
                     self.process_tree.selection_set(item_id)
-                    self.process_tree.see(item_id)
-
+                    # REMOVED: self.process_tree.see(item_id)  # This causes scrolling
+            
                 filtered_count += 1
     
         self.process_count_label.config(
             text=f"Processes: {filtered_count} / {len(self.all_processes)}"
-        )   
+        )
     
         # Only apply sorting if user has chosen a sort or on initial load
         if hasattr(self, 'sort_column') and self.sort_column and self.user_sorted:
@@ -414,8 +425,9 @@ class Dashboard:
                 items.sort(key=lambda x: str(x[0]).lower(), reverse=current_reverse)
         
             for index, (_, item) in enumerate(items):
-                self.process_tree.move(item, '', index)
-    
+                self.process_tree.move(item, '', index)  
+
+
     def sort_treeview(self, col):
         """Sort treeview by column"""
         # If clicking the same column, toggle direction
@@ -470,11 +482,40 @@ class Dashboard:
             "Productivity": scheduler_module.Mode.PRODUCTIVITY,
             "Power-Saving": scheduler_module.Mode.POWER_SAVING
         }
-        
+    
         selected_mode = self.mode_combo.get()
+    
+        # Handle brightness for power saving mode
+        if selected_mode == "Power-Saving":
+            # Save current brightness before changing
+            if not hasattr(self, '_brightness_saved'):
+                self.brightness_control.save_current_brightness()
+                self._brightness_saved = True
+        
+            # Set brightness to 20% for power saving
+            if self.brightness_control.set_brightness_percent(20):
+                self.log_message("Display brightness reduced to 20% for power saving")
+            else:
+                self.log_message("Could not adjust display brightness (may not be supported)")
+        else:
+            # Restore original brightness when leaving power saving mode
+            if hasattr(self, '_brightness_saved') and self._brightness_saved:
+                if self.brightness_control.restore_brightness():
+                    self.log_message("Display brightness restored")
+                self._brightness_saved = False
+    
+        # Apply mode to scheduler
         self.scheduler.set_mode(mode_map[selected_mode])
         self.mode_label.config(text=f"Mode: {selected_mode}")
-        self.log_message(f"Mode changed to {selected_mode}")
+    
+        # Log mode-specific behavior
+        if selected_mode == "Gaming":
+            self.log_message(f"Mode changed to {selected_mode} - Foreground apps prioritized, background suspended")
+        elif selected_mode == "Power-Saving":
+            self.log_message(f"Mode changed to {selected_mode} - All processes minimized, heavy processes suspended")
+        else:
+            self.log_message(f"Mode changed to {selected_mode} - Balanced resource allocation")
+    
         self.update_ui()
     
     def apply_settings(self):
@@ -571,6 +612,10 @@ class Dashboard:
         pid = int(self.process_tree.item(selected[0])["values"][0])
         proc_name = self.process_tree.item(selected[0])["values"][1]
         
+        import os
+        actual_uid = os.geteuid()
+        self.log_message(f"DEBUG: Current UID = {actual_uid}, PID to terminate = {pid}")
+        
         # Extra warning for system processes
         warning_msg = f"Are you sure you want to terminate {proc_name} (PID: {pid})?"
         
@@ -612,6 +657,12 @@ class Dashboard:
         if messagebox.askokcancel("Quit", "Do you want to quit the Smart Resource Scheduler?"):
             self.log_message("Scheduler stopping...")
             self.running = False
+        
+            # Restore brightness if it was changed
+            if hasattr(self, '_brightness_saved') and self._brightness_saved:
+                self.brightness_control.restore_brightness()
+                self.log_message("Display brightness restored")
+        
             self.scheduler.stop_monitoring()
             self.root.destroy()
 

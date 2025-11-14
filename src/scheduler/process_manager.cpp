@@ -164,12 +164,23 @@ void ProcessManager::set_priority(pid_t pid, int priority) {
 }
 
 void ProcessManager::suspend_process(pid_t pid) {
+    // Check if process exists first
+    if (kill(pid, 0) != 0) {
+        if (errno == ESRCH) {
+            throw std::runtime_error("Process " + std::to_string(pid) + " not found");
+        } else if (errno == EPERM) {
+            throw std::runtime_error("Permission denied: Cannot access PID " + 
+                std::to_string(pid) + ". Current UID: " + std::to_string(geteuid()) +
+                " (must be 0 for root)");
+        }
+    }
+    
     if (kill(pid, SIGSTOP) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");
         } else if (errno == EPERM) {
             throw std::runtime_error("Permission denied to suspend PID " + 
-                std::to_string(pid) + " (need root privileges)");
+                std::to_string(pid) + ". Current UID: " + std::to_string(geteuid()));
         } else {
             throw std::runtime_error("Failed to suspend PID " + 
                 std::to_string(pid) + ": " + strerror(errno));
@@ -178,12 +189,22 @@ void ProcessManager::suspend_process(pid_t pid) {
 }
 
 void ProcessManager::resume_process(pid_t pid) {
+    // Check if process exists first
+    if (kill(pid, 0) != 0) {
+        if (errno == ESRCH) {
+            throw std::runtime_error("Process " + std::to_string(pid) + " not found");
+        } else if (errno == EPERM) {
+            throw std::runtime_error("Permission denied: Cannot access PID " + 
+                std::to_string(pid) + ". Current UID: " + std::to_string(geteuid()));
+        }
+    }
+    
     if (kill(pid, SIGCONT) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");
         } else if (errno == EPERM) {
             throw std::runtime_error("Permission denied to resume PID " + 
-                std::to_string(pid) + " (need root privileges)");
+                std::to_string(pid) + ". Current UID: " + std::to_string(geteuid()));
         } else {
             throw std::runtime_error("Failed to resume PID " + 
                 std::to_string(pid) + ": " + strerror(errno));
@@ -197,12 +218,25 @@ void ProcessManager::terminate_process(pid_t pid) {
         throw std::runtime_error("Cannot terminate init process (PID 1)");
     }
     
+    // Check if process exists first
+    if (kill(pid, 0) != 0) {
+        if (errno == ESRCH) {
+            throw std::runtime_error("Process " + std::to_string(pid) + " not found");
+        } else if (errno == EPERM) {
+            // Process exists but we don't have permission even to check
+            throw std::runtime_error("Permission denied: Cannot access PID " + 
+                std::to_string(pid) + ". Try running as root with: sudo python3 dashboard.py");
+        }
+    }
+    
+    // Try to terminate
     if (kill(pid, SIGTERM) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");
         } else if (errno == EPERM) {
-            throw std::runtime_error("Permission denied to terminate PID " + 
-                std::to_string(pid) + " (need root privileges)");
+            throw std::runtime_error("Permission denied: Cannot terminate PID " + 
+                std::to_string(pid) + ". Current UID: " + std::to_string(geteuid()) +
+                " (must be 0 for root). Run with: sudo python3 dashboard.py");
         } else {
             throw std::runtime_error("Failed to terminate PID " + 
                 std::to_string(pid) + ": " + strerror(errno));

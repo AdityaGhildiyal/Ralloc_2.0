@@ -90,30 +90,45 @@ void Scheduler::apply_mode_settings() {
         
         switch (current_mode) {
             case Mode::GAMING:
-                // Boost foreground applications, deprioritize background
+                // GAMING MODE: Maximize foreground, suspend background
                 if (proc.is_foreground) {
-                    priority = std::max(-15, priority - 5);
-                } else if (!proc.is_system) {
-                    priority = std::min(15, priority + 5);
+                    // Boost foreground applications significantly
+                    priority = -20; // Maximum priority
+                } else if (proc.is_system) {
+                    // Keep system processes at normal priority
+                    priority = 0;
+                } else {
+                    // Suspend all non-essential background processes
+                    priority = 19; // Minimum priority
+                    should_suspend = true;
                 }
-                should_suspend = false;
                 break;
                 
             case Mode::PRODUCTIVITY:
-                // Balanced approach
+                // PRODUCTIVITY MODE: Balanced approach
                 if (proc.is_foreground) {
-                    priority = std::max(-10, priority - 3);
-                } else if (!proc.is_system) {
-                    priority = std::min(10, priority + 2);
+                    priority = -10; // High priority for active apps
+                } else if (proc.is_system) {
+                    priority = 0;
+                } else {
+                    priority = 5; // Lower priority for background
                 }
-                should_suspend = false;
+                should_suspend = false; // Don't suspend in productivity mode
                 break;
                 
             case Mode::POWER_SAVING:
-                // Reduce all priorities, suspend high-memory processes
-                if (!proc.is_system) {
-                    priority = std::min(19, priority + 5);
-                    if (proc.memory_usage > mem_threshold_mb * 1024 * 1024 && !proc.is_foreground) {
+                // POWER SAVING MODE: Minimize everything, suspend aggressively
+                if (proc.is_system) {
+                    // Even system processes get reduced priority
+                    priority = std::min(10, priority + 5);
+                } else if (proc.is_foreground) {
+                    // Foreground gets medium priority
+                    priority = 5;
+                } else {
+                    // Background processes: minimum priority and suspend
+                    priority = 19;
+                    // Suspend if using significant memory or CPU
+                    if (proc.memory_usage > 100 * 1024 * 1024 || proc.cpu_usage > 5.0) {
                         should_suspend = true;
                     }
                 }
@@ -128,7 +143,8 @@ void Scheduler::apply_mode_settings() {
             if (should_suspend && !proc.is_suspended) {
                 ProcessManager::suspend_process(proc.pid);
                 proc.is_suspended = true;
-            } else if (!should_suspend && proc.is_suspended && current_mode != Mode::POWER_SAVING) {
+            } else if (!should_suspend && proc.is_suspended) {
+                // Resume if we switched out of a mode that suspends
                 ProcessManager::resume_process(proc.pid);
                 proc.is_suspended = false;
             }
