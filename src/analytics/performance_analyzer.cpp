@@ -14,7 +14,6 @@ void PerformanceAnalyzer::collect_sample(
     cpu_samples.push_back(system_cpu);
     memory_samples.push_back(system_memory);
     
-    // Keep only last 100 samples
     if (cpu_samples.size() > 100) {
         cpu_samples.erase(cpu_samples.begin());
     }
@@ -22,7 +21,6 @@ void PerformanceAnalyzer::collect_sample(
         memory_samples.erase(memory_samples.begin());
     }
     
-    // Count process types
     process_counts.clear();
     for (const auto& proc : processes) {
         if (proc.is_system) {

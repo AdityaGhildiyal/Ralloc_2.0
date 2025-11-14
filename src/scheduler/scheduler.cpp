@@ -67,7 +67,6 @@ void Scheduler::monitoring_loop() {
                     MemoryManager::get_cpu_usage());
             }
             
-            // Sleep for 1 second or until stopped
             std::this_thread::sleep_for(std::chrono::seconds(1));
             
         } catch (const std::exception& e) {
@@ -82,7 +81,6 @@ void Scheduler::monitor_processes() {
 
 void Scheduler::apply_mode_settings() {
     for (auto& proc : processes) {
-        // Skip if process no longer exists
         if (proc.pid <= 0) continue;
         
         int priority = proc.priority;
@@ -90,44 +88,34 @@ void Scheduler::apply_mode_settings() {
         
         switch (current_mode) {
             case Mode::GAMING:
-                // GAMING MODE: Maximize foreground, suspend background
                 if (proc.is_foreground) {
-                    // Boost foreground applications significantly
-                    priority = -20; // Maximum priority
+                    priority = -20; 
                 } else if (proc.is_system) {
-                    // Keep system processes at normal priority
                     priority = 0;
                 } else {
-                    // Suspend all non-essential background processes
-                    priority = 19; // Minimum priority
+                    priority = 19;
                     should_suspend = true;
                 }
                 break;
                 
             case Mode::PRODUCTIVITY:
-                // PRODUCTIVITY MODE: Balanced approach
                 if (proc.is_foreground) {
-                    priority = -10; // High priority for active apps
+                    priority = -10; 
                 } else if (proc.is_system) {
                     priority = 0;
                 } else {
-                    priority = 5; // Lower priority for background
+                    priority = 5;
                 }
-                should_suspend = false; // Don't suspend in productivity mode
+                should_suspend = false; 
                 break;
                 
             case Mode::POWER_SAVING:
-                // POWER SAVING MODE: Minimize everything, suspend aggressively
                 if (proc.is_system) {
-                    // Even system processes get reduced priority
                     priority = std::min(10, priority + 5);
                 } else if (proc.is_foreground) {
-                    // Foreground gets medium priority
                     priority = 5;
                 } else {
-                    // Background processes: minimum priority and suspend
                     priority = 19;
-                    // Suspend if using significant memory or CPU
                     if (proc.memory_usage > 100 * 1024 * 1024 || proc.cpu_usage > 5.0) {
                         should_suspend = true;
                     }
@@ -144,12 +132,10 @@ void Scheduler::apply_mode_settings() {
                 ProcessManager::suspend_process(proc.pid);
                 proc.is_suspended = true;
             } else if (!should_suspend && proc.is_suspended) {
-                // Resume if we switched out of a mode that suspends
                 ProcessManager::resume_process(proc.pid);
                 proc.is_suspended = false;
             }
         } catch (const std::exception& e) {
-            // Process might have terminated, continue with others
             continue;
         }
     }
@@ -176,13 +162,12 @@ void Scheduler::perform_scheduling() {
 }
 
 void Scheduler::fcfs_schedule() {
-    // First-Come-First-Served: Earlier PIDs get higher priority
     std::sort(processes.begin(), processes.end(), 
         [](const ProcessInfo& a, const ProcessInfo& b) {
             return a.pid < b.pid;
         });
     
-    int priority = -20; // Start with highest priority
+    int priority = -20; 
     for (auto& proc : processes) {
         if (!proc.is_suspended && !proc.is_system) {
             priority = std::min(19, priority + 1);
@@ -197,7 +182,6 @@ void Scheduler::fcfs_schedule() {
 }
 
 void Scheduler::sjf_schedule() {
-    // Shortest Job First: Processes with less CPU time get higher priority
     std::sort(processes.begin(), processes.end(), 
         [](const ProcessInfo& a, const ProcessInfo& b) {
             return a.last_cpu_time < b.last_cpu_time;
@@ -218,7 +202,6 @@ void Scheduler::sjf_schedule() {
 }
 
 void Scheduler::priority_schedule() {
-    // Priority-based: Use existing priorities
     std::sort(processes.begin(), processes.end(), 
         [](const ProcessInfo& a, const ProcessInfo& b) {
             return a.priority < b.priority;
@@ -236,10 +219,9 @@ void Scheduler::priority_schedule() {
 }
 
 void Scheduler::rr_schedule() {
-    // Round Robin: All processes get equal priority
     for (auto& proc : processes) {
         if (!proc.is_suspended && !proc.is_system) {
-            proc.priority = 0; // Normal priority
+            proc.priority = 0; 
             try {
                 ProcessManager::set_priority(proc.pid, 0);
             } catch (const std::exception& e) {
@@ -252,7 +234,6 @@ void Scheduler::rr_schedule() {
 void Scheduler::hybrid_schedule() {
     if (processes.empty()) return;
     
-    // Classify processes into categories
     std::vector<ProcessInfo*> interactive, io_bound, cpu_bound, background;
     
     for (auto& proc : processes) {
@@ -267,10 +248,8 @@ void Scheduler::hybrid_schedule() {
         } else {
             background.push_back(&proc);
         }
-    }
-    
-    // Assign priorities based on category
-    // Interactive: Highest priority (-15 to -10)
+    }   
+
     int priority = -15;
     for (auto* proc : interactive) {
         proc->priority = priority;
@@ -282,7 +261,6 @@ void Scheduler::hybrid_schedule() {
         priority = std::min(-10, priority + 1);
     }
     
-    // I/O bound: Medium-high priority (-5 to 0)
     priority = -5;
     for (auto* proc : io_bound) {
         proc->priority = priority;
@@ -294,7 +272,6 @@ void Scheduler::hybrid_schedule() {
         priority = std::min(0, priority + 1);
     }
     
-    // Background: Medium priority (5 to 10)
     priority = 5;
     for (auto* proc : background) {
         proc->priority = priority;
@@ -306,7 +283,6 @@ void Scheduler::hybrid_schedule() {
         priority = std::min(10, priority + 1);
     }
     
-    // CPU bound: Lower priority (10 to 19)
     priority = 10;
     for (auto* proc : cpu_bound) {
         proc->priority = priority;

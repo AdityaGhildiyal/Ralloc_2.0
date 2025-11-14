@@ -9,7 +9,6 @@ namespace py = pybind11;
 PYBIND11_MODULE(scheduler_module, m) {
     m.doc() = "Smart Resource Scheduler module for Linux process management";
     
-    // Expose ProcessInfo structure
     py::class_<ProcessInfo>(m, "ProcessInfo")
         .def(py::init<>())
         .def_readonly("pid", &ProcessInfo::pid, "Process ID")
@@ -26,14 +25,12 @@ PYBIND11_MODULE(scheduler_module, m) {
                    " name='" + p.name + "' priority=" + std::to_string(p.priority) + ">";
         });
     
-    // Expose Mode enum
     py::enum_<Mode>(m, "Mode")
         .value("GAMING", Mode::GAMING, "Gaming mode - prioritizes foreground applications")
         .value("PRODUCTIVITY", Mode::PRODUCTIVITY, "Productivity mode - balanced priorities")
         .value("POWER_SAVING", Mode::POWER_SAVING, "Power saving mode - reduces all priorities")
         .export_values();
     
-    // Expose SchedulingAlgorithm enum
     py::enum_<SchedulingAlgorithm>(m, "SchedulingAlgorithm")
         .value("FCFS", SchedulingAlgorithm::FCFS, "First-Come-First-Served")
         .value("SJF", SchedulingAlgorithm::SJF, "Shortest Job First")
@@ -42,7 +39,6 @@ PYBIND11_MODULE(scheduler_module, m) {
         .value("HYBRID", SchedulingAlgorithm::HYBRID, "Hybrid scheduling (recommended)")
         .export_values();
     
-    // Expose Scheduler class
     py::class_<Scheduler>(m, "Scheduler")
         .def(py::init<>(), "Create a new scheduler instance")
         .def("set_mode", &Scheduler::set_mode, 
@@ -63,7 +59,6 @@ PYBIND11_MODULE(scheduler_module, m) {
         .def("adjust_priorities", &Scheduler::adjust_priorities,
              "Manually adjust process priorities based on current mode");
     
-    // Expose ProcessManager static methods
     py::class_<ProcessManager>(m, "ProcessManager")
         .def_static("get_running_processes", &ProcessManager::get_running_processes,
                     "Get all currently running processes")
@@ -80,7 +75,6 @@ PYBIND11_MODULE(scheduler_module, m) {
                     py::arg("pid"),
                     "Terminate a process with SIGTERM (requires root)");
     
-    // Expose MemoryManager static methods
     py::class_<MemoryManager>(m, "MemoryManager")
         .def_static("get_cpu_usage", &MemoryManager::get_cpu_usage,
                     "Get current CPU usage percentage")
@@ -89,7 +83,6 @@ PYBIND11_MODULE(scheduler_module, m) {
         .def_static("get_swap_usage", &MemoryManager::get_swap_usage,
                     "Get current swap usage percentage");
     
-    // Add version info
     m.attr("__version__") = "1.0.0";
     m.attr("__author__") = "Smart Resource Scheduler Team";
 }

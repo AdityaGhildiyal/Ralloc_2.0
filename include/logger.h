@@ -23,4 +23,4 @@ private:
     static std::ofstream log_file;
 };
 
-#endif // LOGGER_H
+#endif 

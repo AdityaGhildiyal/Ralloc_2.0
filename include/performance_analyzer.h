@@ -34,4 +34,4 @@ private:
     static std::map<std::string, int> process_counts;
 };
 
-#endif // PERFORMANCE_ANALYZER_H
+#endif

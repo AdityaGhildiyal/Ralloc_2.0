@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Brightness control module for power saving mode
 """
@@ -12,7 +11,6 @@ class BrightnessControl:
     
     def _find_brightness_interface(self):
         """Find the brightness control interface"""
-        # Common brightness paths
         paths = [
             '/sys/class/backlight/intel_backlight',
             '/sys/class/backlight/acpi_video0',
@@ -25,7 +23,6 @@ class BrightnessControl:
             if os.path.exists(path):
                 return path
         
-        # Try to find any backlight
         backlight_dir = '/sys/class/backlight'
         if os.path.exists(backlight_dir):
             devices = os.listdir(backlight_dir)
@@ -65,7 +62,6 @@ class BrightnessControl:
         
         try:
             brightness_file = os.path.join(self.brightness_interface, 'brightness')
-            # Need root to write to brightness
             subprocess.run(['sh', '-c', f'echo {value} > {brightness_file}'], 
                          check=True, stderr=subprocess.DEVNULL)
             return True
@@ -79,7 +75,7 @@ class BrightnessControl:
             return False
         
         value = int((percent / 100.0) * max_brightness)
-        value = max(1, min(value, max_brightness))  # Ensure between 1 and max
+        value = max(1, min(value, max_brightness))  
         return self.set_brightness(value)
     
     def save_current_brightness(self):

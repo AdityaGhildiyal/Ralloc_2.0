@@ -22,7 +22,6 @@ std::vector<ProcessInfo> ProcessManager::get_running_processes() {
     static std::map<pid_t, std::chrono::steady_clock::time_point> prev_times;
     auto now = std::chrono::steady_clock::now();
     
-    // Clean up stale entries
     std::vector<pid_t> stale_pids;
     for (const auto& pair : prev_cpu_times) {
         bool found = false;
@@ -59,13 +58,11 @@ std::vector<ProcessInfo> ProcessManager::get_running_processes() {
             std::string line;
             std::getline(stat_file, line);
             
-            // Parse process name (between parentheses)
             size_t start = line.find('(');
             size_t end = line.rfind(')');
             if (start != std::string::npos && end != std::string::npos && end > start) {
                 name = line.substr(start + 1, end - start - 1);
                 
-                // Parse fields after the closing parenthesis
                 std::string after_comm = line.substr(end + 2);
                 std::istringstream iss(after_comm);
                 int ppid, pgrp, session, tpgid;
@@ -81,10 +78,8 @@ std::vector<ProcessInfo> ProcessManager::get_running_processes() {
             stat_file.close();
         }
         
-        // Skip if name is empty
         if (name.empty()) continue;
         
-        // Read memory usage
         long mem = 0;
         std::ifstream status_file(std::string("/proc/") + entry->d_name + "/status");
         if (status_file.is_open()) {
@@ -96,7 +91,7 @@ std::vector<ProcessInfo> ProcessManager::get_running_processes() {
                     long value;
                     std::string unit;
                     if (iss >> key >> value >> unit) {
-                        mem = value * 1024; // Convert kB to bytes
+                        mem = value * 1024; 
                     }
                     break;
                 }
@@ -104,39 +99,33 @@ std::vector<ProcessInfo> ProcessManager::get_running_processes() {
             status_file.close();
         }
         
-        // Calculate CPU usage
         double cpu_usage = 0.0;
         if (prev_cpu_times.count(pid) && prev_times.count(pid)) {
             auto elapsed = std::chrono::duration<double>(now - prev_times[pid]).count();
-            if (elapsed > 0.1) { // Only calculate if enough time has passed
+            if (elapsed > 0.1) { 
                 long delta_cpu = cpu_time - prev_cpu_times[pid];
-                // Convert jiffies to seconds, then to percentage
                 cpu_usage = (delta_cpu * 100.0) / (sysconf(_SC_CLK_TCK) * elapsed);
-                cpu_usage = std::min(cpu_usage, 100.0); // Cap at 100%
+                cpu_usage = std::min(cpu_usage, 100.0); 
             }
         }
         prev_cpu_times[pid] = cpu_time;
         prev_times[pid] = now;
         
-        // Determine if process is system or foreground
-        // A process is considered foreground if it has a controlling terminal
         bool is_fg = (tty_nr > 0);
         
-        // System processes typically have low PIDs or are kernel threads
         bool is_system = (pid < 1000) || (state == 'S' && name.find("kworker") != std::string::npos) ||
                          name.find("systemd") != std::string::npos || 
                          name.find("kthreadd") != std::string::npos;
         
-        // Get current priority
         int current_priority = getpriority(PRIO_PROCESS, pid);
-        if (errno == ESRCH) continue; // Process no longer exists
-        
+        if (errno == ESRCH) continue; 
+
         processes.push_back({
             pid, 
             name, 
             is_system, 
             is_fg, 
-            (state == 'T'), // Suspended if state is 'T' (stopped)
+            (state == 'T'), 
             current_priority, 
             mem, 
             cpu_usage, 
@@ -151,7 +140,6 @@ void ProcessManager::set_priority(pid_t pid, int priority) {
     priority = std::max(-20, std::min(19, priority));
     if (setpriority(PRIO_PROCESS, pid, priority) != 0) {
         if (errno == ESRCH) {
-            // Process no longer exists - not an error we want to throw
             return;
         } else if (errno == EPERM) {
             throw std::runtime_error("Permission denied to set priority for PID " + 
@@ -164,7 +152,6 @@ void ProcessManager::set_priority(pid_t pid, int priority) {
 }
 
 void ProcessManager::suspend_process(pid_t pid) {
-    // Check if process exists first
     if (kill(pid, 0) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");
@@ -189,7 +176,6 @@ void ProcessManager::suspend_process(pid_t pid) {
 }
 
 void ProcessManager::resume_process(pid_t pid) {
-    // Check if process exists first
     if (kill(pid, 0) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");
@@ -213,23 +199,19 @@ void ProcessManager::resume_process(pid_t pid) {
 }
 
 void ProcessManager::terminate_process(pid_t pid) {
-    // Check if it's a critical system process
     if (pid == 1) {
         throw std::runtime_error("Cannot terminate init process (PID 1)");
     }
     
-    // Check if process exists first
     if (kill(pid, 0) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");
         } else if (errno == EPERM) {
-            // Process exists but we don't have permission even to check
             throw std::runtime_error("Permission denied: Cannot access PID " + 
                 std::to_string(pid) + ". Try running as root with: sudo python3 dashboard.py");
         }
     }
     
-    // Try to terminate
     if (kill(pid, SIGTERM) != 0) {
         if (errno == ESRCH) {
             throw std::runtime_error("Process " + std::to_string(pid) + " not found");

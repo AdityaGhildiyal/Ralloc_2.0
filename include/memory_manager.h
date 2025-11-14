@@ -12,4 +12,4 @@ public:
     static void optimize_memory(std::vector<ProcessInfo>& processes, double mem_threshold_mb);
 };
 
-#endif // MEMORY_MANAGER_H
+#endif 

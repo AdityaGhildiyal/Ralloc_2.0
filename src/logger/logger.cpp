@@ -16,7 +16,6 @@ void Logger::log_performance(
 ) {
     if (!logging_enabled) return;
     
-    // Get current timestamp
     auto now = std::chrono::system_clock::now();
     auto now_c = std::chrono::system_clock::to_time_t(now);
     std::tm* now_tm = std::localtime(&now_c);
@@ -25,7 +24,6 @@ void Logger::log_performance(
     ss << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S");
     std::string timestamp = ss.str();
     
-    // Open log file in append mode
     if (!log_file.is_open()) {
         log_file.open(log_filename, std::ios::app);
         if (!log_file.is_open()) {
@@ -34,13 +32,11 @@ void Logger::log_performance(
         }
     }
     
-    // Log system stats
     log_file << "[" << timestamp << "] "
              << "System - CPU: " << std::fixed << std::setprecision(2) << cpu_usage << "%, "
              << "Memory: " << memory_usage << "%, "
              << "Processes: " << processes.size() << std::endl;
     
-    // Count suspended processes
     int suspended_count = 0;
     for (const auto& proc : processes) {
         if (proc.is_suspended) suspended_count++;

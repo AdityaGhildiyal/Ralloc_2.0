@@ -26,4 +26,4 @@ public:
     static void terminate_process(pid_t pid);
 };
 
-#endif // PROCESS_MANAGER_H
+#endif 

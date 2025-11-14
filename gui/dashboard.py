@@ -14,7 +14,6 @@ class Dashboard:
         self.root.title("Smart Resource Scheduler v1.0")
         self.root.geometry("1200x800")
         
-        # Check for root privileges
         if os.geteuid() != 0:
             messagebox.showerror(
                 "Insufficient Privileges",
@@ -26,38 +25,30 @@ class Dashboard:
         self.scheduler = scheduler_module.Scheduler()
         self.scheduler.start_monitoring()
 
-        # Initialize brightness control
         self.brightness_control = BrightnessControl()
         
-        # State variables
         self.running = True
         self.all_processes = []
-        self.sort_column = "Memory"  # Default sort column
-        self.sort_reverse = True     # True = descending (higher values first)
+        self.sort_column = "Memory"  
+        self.sort_reverse = True     
         self.user_sorted = False
         
-        # Setup UI
         self.setup_ui()
         
-        # Start periodic updates
         self.schedule_update()
         
-        # Handle window close
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
     
     def setup_ui(self):
         """Setup the user interface"""
-        # Main frame
         self.main_frame = ttk.Frame(self.root, padding="10")
         self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Configure grid weights
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
         
-        # Mode label
         self.mode_label = ttk.Label(
             self.main_frame, 
             text="Mode: Productivity", 
@@ -66,11 +57,9 @@ class Dashboard:
         )
         self.mode_label.grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
         
-        # Notebook (tabs)
         self.notebook = ttk.Notebook(self.main_frame)
         self.notebook.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Create tabs
         self.setup_processes_tab()
         self.setup_performance_tab()
         self.setup_settings_tab()
@@ -81,15 +70,12 @@ class Dashboard:
         self.processes_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.processes_frame, text="Processes")
         
-        # Configure grid
         self.processes_frame.columnconfigure(0, weight=1)
         self.processes_frame.rowconfigure(2, weight=1)
         
-        # Top controls frame
         top_frame = ttk.Frame(self.processes_frame)
         top_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
-        # Mode selector
         ttk.Label(top_frame, text="Mode:").grid(row=0, column=0, padx=(0, 5))
         self.mode_combo = ttk.Combobox(
             top_frame,
@@ -101,17 +87,14 @@ class Dashboard:
         self.mode_combo.grid(row=0, column=1, padx=(0, 20))
         self.mode_combo.bind("<<ComboboxSelected>>", self.on_mode_changed)
         
-        # Search/filter
         ttk.Label(top_frame, text="Filter:").grid(row=0, column=2, padx=(0, 5))
         self.search_entry = ttk.Entry(top_frame, width=20)
         self.search_entry.grid(row=0, column=3, padx=(0, 10))
         self.search_entry.bind("<KeyRelease>", self.filter_processes)
         
-        # Process count
         self.process_count_label = ttk.Label(top_frame, text="Processes: 0")
         self.process_count_label.grid(row=0, column=4, padx=(20, 0))
         
-        # Button frame
         button_frame = ttk.Frame(self.processes_frame)
         button_frame.grid(row=1, column=0, sticky=tk.W, pady=(0, 10))
         
@@ -120,7 +103,6 @@ class Dashboard:
         ttk.Button(button_frame, text="Terminate", command=self.terminate_process, width=12).grid(row=0, column=2, padx=5)
         ttk.Button(button_frame, text="Refresh", command=self.update_ui, width=12).grid(row=0, column=3, padx=5)
         
-        # Process tree with scrollbars
         tree_frame = ttk.Frame(self.processes_frame)
         tree_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         tree_frame.columnconfigure(0, weight=1)
@@ -133,7 +115,6 @@ class Dashboard:
             selectmode="extended"
             )
         
-        # Configure columns
         self.process_tree.heading("PID", text="PID", command=lambda: self.sort_treeview("PID"))
         self.process_tree.heading("Name", text="Name", command=lambda: self.sort_treeview("Name"))
         self.process_tree.heading("Priority", text="Priority", command=lambda: self.sort_treeview("Priority"))
@@ -148,7 +129,6 @@ class Dashboard:
         self.process_tree.column("Memory", width=120, anchor=tk.E)
         self.process_tree.column("CPU", width=100, anchor=tk.E)
         
-        # Scrollbars
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.process_tree.yview)
         hsb = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.process_tree.xview)
         self.process_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
@@ -156,20 +136,15 @@ class Dashboard:
         self.process_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         vsb.grid(row=0, column=1, sticky=(tk.N, tk.S))
         hsb.grid(row=1, column=0, sticky=(tk.W, tk.E))
-        # Set default sort column
-        #self.sort_column = "Memory"
-        #self.sort_reverse = False  # Will be toggled to True on first sort
-    
+
     def setup_performance_tab(self):
         """Setup the performance monitoring tab"""
         self.performance_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.performance_frame, text="Performance")
         
-        # Configure grid
         self.performance_frame.columnconfigure(0, weight=1)
         self.performance_frame.rowconfigure(1, weight=1)
         
-        # Status labels frame
         self.status_frame = ttk.Frame(self.performance_frame)
         self.status_frame.grid(row=0, column=0, sticky=tk.W, pady=(0, 10))
         
@@ -182,7 +157,6 @@ class Dashboard:
         self.swap_label = ttk.Label(self.status_frame, text="Swap: 0.00%", font=("Arial", 12))
         self.swap_label.grid(row=0, column=2, padx=10)
         
-        # Matplotlib graph
         self.fig, self.ax = plt.subplots(figsize=(10, 6))
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.performance_frame)
         self.canvas.get_tk_widget().grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -198,7 +172,6 @@ class Dashboard:
         self.settings_frame = ttk.Frame(self.notebook, padding="20")
         self.notebook.add(self.settings_frame, text="Settings")
         
-        # Scheduling settings
         settings_label = ttk.Label(self.settings_frame, text="Scheduling Parameters", font=("Arial", 12, "bold"))
         settings_label.grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 20))
         
@@ -222,7 +195,6 @@ class Dashboard:
         self.algorithm_combo.set("Hybrid")
         self.algorithm_combo.grid(row=3, column=1, sticky=tk.W, padx=(10, 0), pady=5)
         
-        # Algorithm descriptions
         descriptions = ttk.LabelFrame(self.settings_frame, text="Algorithm Descriptions", padding="10")
         descriptions.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(20, 10))
         
@@ -254,11 +226,9 @@ class Dashboard:
         self.logs_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.logs_frame, text="Logs")
         
-        # Configure grid
         self.logs_frame.columnconfigure(0, weight=1)
         self.logs_frame.rowconfigure(0, weight=1)
         
-        # Log text widget with scrollbar
         log_container = ttk.Frame(self.logs_frame)
         log_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         log_container.columnconfigure(0, weight=1)
@@ -271,10 +241,8 @@ class Dashboard:
         scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.log_text.config(yscrollcommand=scrollbar.set)
         
-        # Clear logs button
         ttk.Button(self.logs_frame, text="Clear Logs", command=self.clear_logs).grid(row=1, column=0, pady=(10, 0))
         
-        # Log initial message
         self.log_message("Smart Resource Scheduler started successfully")
         self.log_message(f"Running as user: {os.getenv('USER', 'root')} (UID: {os.geteuid()})")
     
@@ -286,34 +254,28 @@ class Dashboard:
             except Exception as e:
                 self.log_message(f"Error updating UI: {str(e)}")
             finally:
-                self.root.after(1000, self.schedule_update)  # Update every 1000ms
+                self.root.after(1000, self.schedule_update)  
     
     def update_ui(self):
         """Update UI with current process list and system stats"""
         try:
-            # Get processes from scheduler
             processes = self.scheduler.get_processes()
             self.all_processes = processes
             
-            # Apply current filter
             self.filter_processes()
             
-            # Update system stats
             cpu = scheduler_module.MemoryManager.get_cpu_usage()
             mem = scheduler_module.MemoryManager.get_system_memory_usage()
             swap = scheduler_module.MemoryManager.get_swap_usage()
             
-            # Update labels with color coding
             self.cpu_label.config(text=f"CPU: {cpu:.2f}%")
             self.mem_label.config(text=f"RAM: {mem:.2f}%")
             self.swap_label.config(text=f"Swap: {swap:.2f}%")
             
-            # Color code based on usage
             self.update_label_color(self.cpu_label, cpu, 80, 60)
             self.update_label_color(self.mem_label, mem, 85, 70)
             self.update_label_color(self.swap_label, swap, 70, 50)
             
-            # Update performance graph
             self.update_graph(cpu, mem, swap)
             
         except Exception as e:
@@ -335,14 +297,12 @@ class Dashboard:
         self.mem_data.append(mem)
         self.swap_data.append(swap)
         
-        # Keep only last 60 seconds
         if len(self.times) > 60:
             self.times.pop(0)
             self.cpu_data.pop(0)
             self.mem_data.pop(0)
             self.swap_data.pop(0)
         
-        # Clear and redraw
         self.ax.clear()
         self.ax.plot(self.times, self.cpu_data, label="CPU Usage (%)", linewidth=2, color='#1f77b4')
         self.ax.plot(self.times, self.mem_data, label="Memory Usage (%)", linewidth=2, color='#ff7f0e')
@@ -363,19 +323,16 @@ class Dashboard:
         """Filter processes based on search term"""
         search_term = self.search_entry.get().lower()
     
-        # Store current selection
         selected_items = self.process_tree.selection()
         selected_pid = None
         if selected_items:
             selected_pid = self.process_tree.item(selected_items[0])["values"][0]
     
-        # Store current scroll position
         first_visible = None
         visible_items = self.process_tree.get_children()
         if visible_items:
-            # Get the first visible item's index
             yview = self.process_tree.yview()
-            first_visible = yview[0]  # Store scroll position
+            first_visible = yview[0] 
     
         self.process_tree.delete(*self.process_tree.get_children())
     
@@ -393,10 +350,8 @@ class Dashboard:
                     f"{proc.cpu_usage:.2f}"
                 ))
             
-                # Restore selection if this was the selected process (but don't scroll to it)
                 if selected_pid and proc.pid == selected_pid:
                     self.process_tree.selection_set(item_id)
-                    # REMOVED: self.process_tree.see(item_id)  # This causes scrolling
             
                 filtered_count += 1
     
@@ -404,9 +359,7 @@ class Dashboard:
             text=f"Processes: {filtered_count} / {len(self.all_processes)}"
         )
     
-        # Only apply sorting if user has chosen a sort or on initial load
         if hasattr(self, 'sort_column') and self.sort_column and self.user_sorted:
-            # Re-apply the user's chosen sort without toggling
             current_reverse = self.sort_reverse
             items = [(self.process_tree.set(item, self.sort_column), item) 
                     for item in self.process_tree.get_children('')]
@@ -430,44 +383,36 @@ class Dashboard:
 
     def sort_treeview(self, col):
         """Sort treeview by column"""
-        # If clicking the same column, toggle direction
         if self.sort_column == col:
             self.sort_reverse = not self.sort_reverse
         else:
-            # New column: default to descending for numeric columns, ascending for text
             self.sort_column = col
             if col in ["Memory", "CPU"]:
-                self.sort_reverse = True  # Descending for numeric
+                self.sort_reverse = True  
             else:
-                self.sort_reverse = False  # Ascending for text/priority
+                self.sort_reverse = False  
     
-        self.user_sorted = True  # Mark that user has manually sorted
-    
+        self.user_sorted = True  
+
         items = [(self.process_tree.set(item, col), item) 
                 for item in self.process_tree.get_children('')]
     
-        # Determine data type for sorting
         if col in ["PID", "Priority"]:
-            # Integer sorting
             try:
                 items.sort(key=lambda x: int(x[0]), reverse=self.sort_reverse)
             except ValueError:
                 items.sort(key=lambda x: str(x[0]).lower(), reverse=self.sort_reverse)
         elif col in ["Memory", "CPU"]:
-            # Float sorting
             try:
                 items.sort(key=lambda x: float(x[0].replace(',', '')), reverse=self.sort_reverse)
             except ValueError:
                 items.sort(key=lambda x: 0.0, reverse=self.sort_reverse)
         else:
-            # String sorting
             items.sort(key=lambda x: str(x[0]).lower(), reverse=self.sort_reverse)
     
-        # Rearrange items
         for index, (_, item) in enumerate(items):
             self.process_tree.move(item, '', index)
     
-        # Update column heading to show sort direction
         for column in self.process_tree["columns"]:
             if column == col:
                 heading = f"{column} {'▼' if self.sort_reverse else '▲'}"
@@ -485,30 +430,24 @@ class Dashboard:
     
         selected_mode = self.mode_combo.get()
     
-        # Handle brightness for power saving mode
         if selected_mode == "Power-Saving":
-            # Save current brightness before changing
             if not hasattr(self, '_brightness_saved'):
                 self.brightness_control.save_current_brightness()
                 self._brightness_saved = True
         
-            # Set brightness to 20% for power saving
             if self.brightness_control.set_brightness_percent(20):
                 self.log_message("Display brightness reduced to 20% for power saving")
             else:
                 self.log_message("Could not adjust display brightness (may not be supported)")
         else:
-            # Restore original brightness when leaving power saving mode
             if hasattr(self, '_brightness_saved') and self._brightness_saved:
                 if self.brightness_control.restore_brightness():
                     self.log_message("Display brightness restored")
                 self._brightness_saved = False
     
-        # Apply mode to scheduler
         self.scheduler.set_mode(mode_map[selected_mode])
         self.mode_label.config(text=f"Mode: {selected_mode}")
     
-        # Log mode-specific behavior
         if selected_mode == "Gaming":
             self.log_message(f"Mode changed to {selected_mode} - Foreground apps prioritized, background suspended")
         elif selected_mode == "Power-Saving":
@@ -562,7 +501,6 @@ class Dashboard:
             pid = int(self.process_tree.item(selected[0])["values"][0])
             proc_name = self.process_tree.item(selected[0])["values"][1]
             
-            # Warn about critical processes
             if proc_name in ['systemd', 'init', 'Xorg', 'gdm', 'sddm']:
                 if not messagebox.askyesno("Warning", 
                     f"Suspending {proc_name} may cause system instability.\n\n"
@@ -616,7 +554,6 @@ class Dashboard:
         actual_uid = os.geteuid()
         self.log_message(f"DEBUG: Current UID = {actual_uid}, PID to terminate = {pid}")
         
-        # Extra warning for system processes
         warning_msg = f"Are you sure you want to terminate {proc_name} (PID: {pid})?"
         
         if proc_name in ['systemd', 'init', 'kthreadd', 'Xorg', 'gdm', 'sddm', 'sshd']:
@@ -658,7 +595,6 @@ class Dashboard:
             self.log_message("Scheduler stopping...")
             self.running = False
         
-            # Restore brightness if it was changed
             if hasattr(self, '_brightness_saved') and self._brightness_saved:
                 self.brightness_control.restore_brightness()
                 self.log_message("Display brightness restored")

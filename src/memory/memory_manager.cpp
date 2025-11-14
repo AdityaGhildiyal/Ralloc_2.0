@@ -32,10 +32,8 @@ double MemoryManager::get_system_memory_usage() {
     
     if (total == 0) return 0.0;
     
-    // Used memory = Total - Free - Buffers - Cached
-    // This matches what 'free' command shows
     long used = total - free - buffers - cached - slab;
-    used = std::max(0L, used); // Ensure non-negative
+    used = std::max(0L, used); 
     
     return (used * 100.0) / total;
 }
@@ -115,41 +113,32 @@ void MemoryManager::optimize_memory(std::vector<ProcessInfo>& processes, double 
     double mem_usage = get_system_memory_usage();
     double swap_usage = get_swap_usage();
     
-    // Only optimize if memory or swap usage is critically high
     if (mem_usage > 90.0 || swap_usage > 70.0) {
-        // Sort processes by memory usage (highest first)
         std::sort(processes.begin(), processes.end(), 
             [](const ProcessInfo& a, const ProcessInfo& b) {
                 return a.memory_usage > b.memory_usage;
             });
         
-        // Suspend non-system processes that exceed the threshold
         int suspended_count = 0;
         for (auto& proc : processes) {
-            // Don't suspend system processes or already suspended processes
             if (proc.is_system || proc.is_suspended) continue;
             
-            // Don't suspend processes with controlling terminal (likely user-facing)
             if (proc.is_foreground) continue;
             
-            // Check if memory usage exceeds threshold
             if (proc.memory_usage > mem_threshold_mb * 1024 * 1024) {
                 try {
                     ProcessManager::suspend_process(proc.pid);
                     proc.is_suspended = true;
                     suspended_count++;
                     
-                    // Stop after suspending a few processes
                     if (suspended_count >= 3) break;
                 } catch (const std::exception& e) {
-                    // Process might have terminated, ignore
                     continue;
                 }
             }
         }
     }
     
-    // Resume processes if memory pressure is relieved
     if (mem_usage < 70.0 && swap_usage < 50.0) {
         for (auto& proc : processes) {
             if (proc.is_suspended && !proc.is_system) {
@@ -157,7 +146,6 @@ void MemoryManager::optimize_memory(std::vector<ProcessInfo>& processes, double 
                     ProcessManager::resume_process(proc.pid);
                     proc.is_suspended = false;
                 } catch (const std::exception& e) {
-                    // Process might have terminated, ignore
                     continue;
                 }
             }

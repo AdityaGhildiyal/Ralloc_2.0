@@ -90,7 +90,6 @@ void test_scheduler() {
     
     std::cout << "\nTesting different modes:" << std::endl;
     
-    // Test Productivity Mode
     std::cout << "\n1. Productivity Mode" << std::endl;
     scheduler.set_mode(Mode::PRODUCTIVITY);
     scheduler.start_monitoring();
@@ -102,7 +101,6 @@ void test_scheduler() {
         [](const ProcessInfo& p) { return p.is_suspended; });
     std::cout << "   Suspended: " << suspended << std::endl;
     
-    // Test Gaming Mode
     std::cout << "\n2. Gaming Mode" << std::endl;
     scheduler.set_mode(Mode::GAMING);
     std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -112,7 +110,6 @@ void test_scheduler() {
         [](const ProcessInfo& p) { return p.is_suspended; });
     std::cout << "   Suspended: " << suspended << std::endl;
     
-    // Test Power Saving Mode
     std::cout << "\n3. Power Saving Mode" << std::endl;
     scheduler.set_mode(Mode::POWER_SAVING);
     std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -122,7 +119,6 @@ void test_scheduler() {
         [](const ProcessInfo& p) { return p.is_suspended; });
     std::cout << "   Suspended: " << suspended << std::endl;
     
-    // Test different algorithms
     std::cout << "\nTesting scheduling algorithms:" << std::endl;
     
     const char* alg_names[] = {"FCFS", "SJF", "Priority", "Round-Robin", "Hybrid"};
@@ -162,7 +158,6 @@ void test_logger() {
 }
 
 int main() {
-    // Check if running as root
     if (geteuid() != 0) {
         std::cerr << "\nWARNING: Not running as root!" << std::endl;
         std::cerr << "Some operations may fail without root privileges." << std::endl;
@@ -174,7 +169,6 @@ int main() {
     print_separator();
     
     try {
-        // Test individual components
         test_process_manager();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         
@@ -184,7 +178,6 @@ int main() {
         test_logger();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         
-        // Only test scheduler if running as root
         if (geteuid() == 0) {
             test_scheduler();
         } else {
